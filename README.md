@@ -41,11 +41,22 @@ Parámetros útiles de URL:
 - **Imágenes:** reemplaza los `.webp` en `assets/img/<proyecto>/` manteniendo los nombres
   (`understanding-01…`, `gallery-01…`) y ajusta los contadores `understanding` / `gallery` en `data.js`.
 
-## Publicar
+## Publicar en GitHub Pages
 
-Es un sitio estático: sube la carpeta `site/` tal cual.
-- **Netlify / Vercel:** arrastra la carpeta o conéctala a un repo. Publish directory = `site`.
-- **GitHub Pages:** sube el contenido de `site/` a la rama de Pages.
+Este directorio ya es un repositorio git (rama `main`, con `.nojekyll`). La raíz del repo = el sitio, así que Pages lo sirve directo.
+
+1. Crea un repositorio vacío en github.com (p. ej. `portafolio`). **No** marques "Add README/.gitignore".
+2. Conéctalo y súbelo (reemplaza `TU-USUARIO`):
+
+   ```bash
+   git remote add origin https://github.com/TU-USUARIO/portafolio.git
+   git push -u origin main
+   ```
+
+3. En el repo: **Settings → Pages → Source: "Deploy from a branch" → Branch: `main` / `(root)` → Save**.
+4. En ~1 min estará en `https://TU-USUARIO.github.io/portafolio/`.
+
+Todas las rutas son relativas, así que funciona igual en un subpath (`/portafolio/`) o en un dominio propio.
 
 ## Fuente
 
