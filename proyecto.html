@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proyecto — Diego Jaramillo</title>
+  <meta name="description" content="Caso de estudio UX/UI — Diego Jaramillo, Diseñador UX/UI Senior." />
+  <meta name="theme-color" content="#faf6f0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <a class="skip" href="#caseRoot" data-lang="es">Saltar al contenido</a>
+  <a class="skip" href="#caseRoot" data-lang="en">Skip to content</a>
+
+  <div class="progress" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <header class="nav is-stuck" id="nav">
+    <a class="nav__brand" href="index.html" aria-label="Diego Jaramillo — inicio">
+      <span class="nav__dot" aria-hidden="true"></span> Diego&nbsp;Jaramillo
+    </a>
+    <button class="nav__toggle" id="navToggle" aria-label="Menú" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav__menu" id="navMenu">
+      <nav class="nav__links" aria-label="Principal">
+        <a class="nav__link" href="index.html#work"><span data-lang="es">Proyectos</span><span data-lang="en">Work</span></a>
+        <a class="nav__link" href="index.html#approach"><span data-lang="es">Cómo trabajo</span><span data-lang="en">Approach</span></a>
+        <a class="nav__link" href="index.html#skills"><span data-lang="es">Capacidades</span><span data-lang="en">Skills</span></a>
+        <a class="nav__link" href="index.html#path"><span data-lang="es">Trayectoria</span><span data-lang="en">Path</span></a>
+        <a class="nav__link" href="index.html#contact"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></a>
+        <div class="lang" role="group" aria-label="Idioma / Language">
+          <button data-set-lang="es" class="is-active">ES</button>
+          <button data-set-lang="en">EN</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="caseRoot"><!-- render JS --></main>
+
+  <!-- CONTACTO -->
+  <footer class="contact" id="contact">
+    <div class="container">
+      <p class="eyebrow reveal"><span data-lang="es">Contacto</span><span data-lang="en">Get in touch</span></p>
+      <h2 class="reveal" data-delay="1">
+        <span data-lang="es">¿Construimos algo <span class="contact__grad">claro</span> juntos?</span>
+        <span data-lang="en">Shall we build something <span class="contact__grad">clear</span> together?</span>
+      </h2>
+      <a class="contact__mail reveal" data-delay="2" href="mailto:diego.jaramilloq@gmail.com"><span class="u">diego.jaramilloq@gmail.com</span></a>
+      <div class="reveal" data-delay="2">
+        <a class="btn-cv" href="assets/Diego-Jaramillo-CV.pdf" download><span data-lang="es">↓ Descargar CV</span><span data-lang="en">↓ Download CV</span></a>
+      </div>
+      <div class="contact__socials reveal" data-delay="3">
+        <a class="social" href="https://www.linkedin.com/in/diego-jaramillo-q/" target="_blank" rel="noopener">LinkedIn ↗</a>
+        <a class="social" href="https://www.behance.net/ojoconejo" target="_blank" rel="noopener">Behance ↗</a>
+        <a class="social" href="https://www.flickr.com/photos/robosapiens/" target="_blank" rel="noopener">Flickr ↗</a>
+      </div>
+      <div class="contact__foot">
+        <span>© <span id="year"></span> Diego Jaramillo · Medellín, Colombia</span>
+        <span><span data-lang="es">Hecho con criterio, no con plantillas.</span><span data-lang="en">Built with intent, not templates.</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
