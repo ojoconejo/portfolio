@@ -429,6 +429,7 @@
           <div>
             <div class="next-case__label">${nextL}</div>
             <div class="next-case__title">${t(nextP.title, lang)}</div>
+            <div class="next-case__client">${lang === "en" ? "Client" : "Cliente"}: ${nextP.client}</div>
           </div>
           <div class="next-case__arrow">→</div>
         </div>
