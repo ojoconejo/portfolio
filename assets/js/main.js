@@ -222,6 +222,7 @@
     function open(list, start) {
       build();
       items = list || []; idx = start || 0;
+      box.classList.toggle("is-single", items.length <= 1);
       renderThumbs();
       go(idx);
       box.classList.add("is-open");
@@ -327,13 +328,6 @@
       : "Prototipos rápidos, mapas mentales y árboles de navegación — validados con el cliente de forma constante para lograr un entendimiento temprano y compartido.";
 
     const pad = (n) => String(n).padStart(2, "0");
-    const gItem = (n) => ({ src: IMG(slug, "gallery-" + pad(n)), alt: title + " — UI " + n, n: n });
-    const frameFig = (group, i, it) =>
-      `<figure class="frame reveal" data-lb="${group}" data-i="${i}">
-         <div class="frame__bar" aria-hidden="true"><i></i><i></i><i></i></div>
-         <img src="${it.src}" alt="${it.alt}" loading="lazy" />
-       </figure>`;
-
     caseGroups = {};
 
     // --- entendimiento (imagen 00), con orden configurable (uOrder) ---
@@ -345,30 +339,16 @@
          <img src="${it.src}" alt="${it.alt} ${i + 1}" loading="lazy" />
        </figure>`).join("");
 
-    // --- galería / tabs ---
-    const coverGroup = p.galleryTabs ? "tab0" : "gallery";
-    let galleryBlockHTML = "";
-    if (p.galleryTabs) {
-      const tabsBtns = [], panels = [];
-      p.galleryTabs.forEach((tab, ti) => {
-        let nums = tab.images.slice();
-        if (ti === 0) nums = [p.cover].concat(nums.filter((x) => x !== p.cover)); // portada primera en el carrusel
-        const gItems = nums.map(gItem);
-        caseGroups["tab" + ti] = gItems;
-        const figs = tab.images.filter((n) => n !== p.cover)
-          .map((n) => frameFig("tab" + ti, gItems.findIndex((x) => x.n === n), gItem(n))).join("");
-        const count = tab.images.filter((n) => n !== p.cover).length;
-        tabsBtns.push(`<button class="case-tab${ti === 0 ? " is-active" : ""}" role="tab" data-tab="${ti}">${t(tab.label, lang)}<span class="n">${count}</span></button>`);
-        panels.push(`<div class="case-tabpanel${ti === 0 ? " is-active" : ""}" data-panel="${ti}"><div class="gallery">${figs}</div></div>`);
-      });
-      galleryBlockHTML = `<div class="case-tabs" role="tablist">${tabsBtns.join("")}</div>${panels.join("")}`;
-    } else {
-      const gAll = Array.from({ length: p.gallery }, (_, k) => gItem(k + 1));
-      caseGroups.gallery = gAll;
-      const figs = gAll.filter((it) => it.n !== p.cover).map((it) => frameFig("gallery", gAll.indexOf(it), it)).join("");
-      galleryBlockHTML = `<div class="gallery">${figs}</div>`;
-    }
-    const coverIdx = (caseGroups[coverGroup] || []).findIndex((x) => x.n === p.cover);
+    // --- pantallas (imagen compuesta que reemplaza la galería) ---
+    const screensSrc = IMG(slug, "pantallas");
+    caseGroups.screens = [{ src: screensSrc, alt: title + " — " + galleryL }];
+    caseGroups.cover = [{ src: IMG(slug, "gallery-" + pad(p.cover)), alt: title + " — " + t(p.type, lang) }];
+    const coverGroup = "cover";
+    const coverIdx = 0;
+    const galleryBlockHTML = `
+      <figure class="screens reveal" data-lb="screens" data-i="0">
+        <img src="${screensSrc}" alt="${title} — ${galleryL}" loading="lazy" />
+      </figure>`;
 
     // impact rows
     const impactRows = p.impact.map((r) => `
@@ -459,16 +439,6 @@
         </div>
       </a>
     `;
-    // interacción de tabs de galería
-    root.querySelectorAll(".case-tab").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const ti = btn.getAttribute("data-tab");
-        root.querySelectorAll(".case-tab").forEach((b) => b.classList.toggle("is-active", b === btn));
-        root.querySelectorAll(".case-tabpanel").forEach((pnl) => pnl.classList.toggle("is-active", pnl.getAttribute("data-panel") === ti));
-        root.querySelectorAll('.case-tabpanel[data-panel="' + ti + '"] .reveal').forEach((el) => el.classList.add("in-view"));
-      });
-    });
-
     observeReveals(root);
     initProgress();
   }
