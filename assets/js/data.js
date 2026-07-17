@@ -231,7 +231,7 @@ window.PROJECTS = {
     n: "04",
     understanding: 1,
     gallery: 10,
-    cover: 3, // Construcción de estudios previos (pantalla principal)
+    cover: 1, // Login
     type: { es: "Flujo de abastecimiento asistido por IA", en: "AI-assisted procurement flow" },
     title: { es: "Abastecimiento", en: "Procurement" },
     role: {
