@@ -231,6 +231,30 @@
     return { open: open, close: close };
   })();
 
+  /* ---------- Palabra rotativa del footer ---------- */
+  function initWordCycle() {
+    const el = document.querySelector(".word-cycle");
+    if (!el) return;
+    const words = {
+      es: ["claro", "efectivo", "genial", "rápido", "transformador", "satisfactorio", "memorable", "intuitivo", "rentable", "impactante"],
+      en: ["clear", "effective", "great", "fast", "transformative", "satisfying", "memorable", "intuitive", "profitable", "impactful"]
+    };
+    let i = 0;
+    const curLang = () => document.documentElement.getAttribute("lang") || "es";
+    const setWord = () => { const l = curLang(); el.textContent = words[l][i % words[l].length]; };
+    setWord();
+    document.addEventListener("langchange", setWord);
+    if (reduceMotion) return; // sin rotación si el usuario pidió menos movimiento
+    setInterval(function () {
+      el.classList.add("is-out");
+      setTimeout(function () {
+        i = (i + 1) % words.es.length;
+        setWord();
+        el.classList.remove("is-out");
+      }, 300);
+    }, 2400);
+  }
+
   // grupos de imágenes del caso actual (se actualizan en cada render)
   let caseGroups = {};
   function initCaseLightbox() {
@@ -466,5 +490,6 @@
     initCursor();
     initTilt();
     initCaseLightbox();
+    initWordCycle();
   });
 })();

@@ -301,6 +301,8 @@ section { position: relative; padding-block: clamp(4rem, 9vw, var(--space-xl)); 
 .contact .eyebrow::before { background: var(--grad); }
 .contact h2 { font-size: var(--step-4); max-width: 14ch; }
 .contact__grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.word-cycle { display: inline-block; transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease); will-change: opacity, transform; }
+.word-cycle.is-out { opacity: 0; transform: translateY(-0.18em); }
 .contact__msg { font-size: var(--step-2); font-weight: var(--w-body); letter-spacing: -0.01em; line-height: 1.35; max-width: 22ch; margin-top: 1.4rem; color: var(--bg); }
 .contact__ln { font-weight: var(--w-bold); white-space: nowrap; }
 .contact__ln .u { background-image: var(--grad); background-repeat: no-repeat; background-position: 0 100%; background-size: 100% 2px; padding-bottom: 3px; transition: background-size var(--t-mid) var(--ease); }
