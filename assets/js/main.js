@@ -52,12 +52,14 @@
       const open = navMenu.classList.toggle("is-open");
       navToggle.classList.toggle("is-open", open);
       navToggle.setAttribute("aria-expanded", open);
+      document.body.style.overflow = open ? "hidden" : "";
     });
     navMenu.querySelectorAll("a").forEach((a) =>
       a.addEventListener("click", () => {
         navMenu.classList.remove("is-open");
         navToggle.classList.remove("is-open");
         navToggle.setAttribute("aria-expanded", "false");
+        document.body.style.overflow = "";
       })
     );
   }
@@ -159,27 +161,87 @@
     window.addEventListener("resize", upd);
   }
 
-  /* ---------- Lightbox ---------- */
-  function initLightbox() {
-    let box = document.querySelector(".lightbox");
-    if (!box) {
+  /* ---------- Lightbox — carrusel con thumbnails ---------- */
+  const Lightbox = (function () {
+    let box, imgEl, thumbsEl, countEl, items = [], idx = 0, touchX = 0;
+    function build() {
+      if (box) return;
       box = document.createElement("div");
       box.className = "lightbox";
+      box.setAttribute("role", "dialog");
+      box.setAttribute("aria-modal", "true");
       box.innerHTML =
-        '<button class="lightbox__close" aria-label="Cerrar">✕</button><img alt="">';
+        '<div class="lightbox__count"></div>' +
+        '<button class="lightbox__close" aria-label="Cerrar / Close">✕</button>' +
+        '<div class="lightbox__stage">' +
+          '<button class="lightbox__nav lightbox__nav--prev" aria-label="Anterior / Previous">‹</button>' +
+          '<img class="lightbox__img" alt="">' +
+          '<button class="lightbox__nav lightbox__nav--next" aria-label="Siguiente / Next">›</button>' +
+        '</div>' +
+        '<div class="lightbox__thumbs"></div>';
       document.body.appendChild(box);
+      imgEl = box.querySelector(".lightbox__img");
+      thumbsEl = box.querySelector(".lightbox__thumbs");
+      countEl = box.querySelector(".lightbox__count");
+      box.querySelector(".lightbox__close").addEventListener("click", close);
+      box.querySelector(".lightbox__nav--prev").addEventListener("click", function (e) { e.stopPropagation(); go(idx - 1); });
+      box.querySelector(".lightbox__nav--next").addEventListener("click", function (e) { e.stopPropagation(); go(idx + 1); });
+      box.addEventListener("click", function (e) {
+        if (e.target === box || e.target.classList.contains("lightbox__stage")) close();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (!box.classList.contains("is-open")) return;
+        if (e.key === "Escape") close();
+        else if (e.key === "ArrowLeft") go(idx - 1);
+        else if (e.key === "ArrowRight") go(idx + 1);
+      });
+      box.addEventListener("touchstart", function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+      box.addEventListener("touchend", function (e) {
+        const dx = e.changedTouches[0].clientX - touchX;
+        if (Math.abs(dx) > 45) go(idx + (dx < 0 ? 1 : -1));
+      });
     }
-    const img = box.querySelector("img");
-    const close = () => { box.classList.remove("is-open"); document.body.style.overflow = ""; };
-    box.addEventListener("click", (e) => { if (e.target === box || e.target.closest(".lightbox__close")) close(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-    document.addEventListener("click", (e) => {
-      const z = e.target.closest("[data-zoom]");
-      if (!z) return;
-      img.src = z.getAttribute("data-zoom");
-      img.alt = z.getAttribute("data-alt") || "";
+    function renderThumbs() {
+      thumbsEl.innerHTML = items.map(function (it, i) {
+        return '<button class="lb-thumb' + (i === idx ? " is-active" : "") + '" data-i="' + i + '" aria-label="' + (i + 1) + '"><img src="' + it.src + '" alt="" loading="lazy"></button>';
+      }).join("");
+      thumbsEl.querySelectorAll(".lb-thumb").forEach(function (b) {
+        b.addEventListener("click", function (e) { e.stopPropagation(); go(+b.getAttribute("data-i")); });
+      });
+    }
+    function go(n) {
+      if (!items.length) return;
+      idx = (n + items.length) % items.length;
+      imgEl.src = items[idx].src;
+      imgEl.alt = items[idx].alt || "";
+      countEl.textContent = (idx + 1) + " / " + items.length;
+      thumbsEl.querySelectorAll(".lb-thumb").forEach(function (b, i) { b.classList.toggle("is-active", i === idx); });
+      const active = thumbsEl.querySelector(".lb-thumb.is-active");
+      if (active) active.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", inline: "center", block: "nearest" });
+    }
+    function open(list, start) {
+      build();
+      items = list || []; idx = start || 0;
+      renderThumbs();
+      go(idx);
       box.classList.add("is-open");
       document.body.style.overflow = "hidden";
+    }
+    function close() { if (box) { box.classList.remove("is-open"); document.body.style.overflow = ""; } }
+    return { open: open, close: close };
+  })();
+
+  // grupos de imágenes del caso actual (se actualizan en cada render)
+  let caseGroups = {};
+  function initCaseLightbox() {
+    const root = document.getElementById("caseRoot");
+    if (!root) return;
+    root.addEventListener("click", function (e) {
+      const fig = e.target.closest("[data-lb]");
+      if (!fig) return;
+      const g = fig.getAttribute("data-lb");
+      const i = +fig.getAttribute("data-i") || 0;
+      if (caseGroups[g]) Lightbox.open(caseGroups[g], i);
     });
   }
 
@@ -240,30 +302,49 @@
       ? "Rapid prototypes, mind maps and navigation trees — validated with the client throughout to reach an early, shared understanding."
       : "Prototipos rápidos, mapas mentales y árboles de navegación — validados con el cliente de forma constante para lograr un entendimiento temprano y compartido.";
 
-    // understanding images
-    let understandHTML = "";
-    for (let i = 1; i <= p.understanding; i++) {
-      const name = "understanding-" + String(i).padStart(2, "0");
-      understandHTML += `
-        <figure class="understand-media reveal" data-zoom="${IMG(slug, name)}" data-alt="${title} — ${processL}">
-          <img src="${IMG(slug, name)}" alt="${title} — ${processL} ${i}" loading="lazy" />
-        </figure>`;
-    }
+    const pad = (n) => String(n).padStart(2, "0");
+    const gItem = (n) => ({ src: IMG(slug, "gallery-" + pad(n)), alt: title + " — UI " + n, n: n });
+    const frameFig = (group, i, it) =>
+      `<figure class="frame reveal" data-lb="${group}" data-i="${i}">
+         <div class="frame__bar" aria-hidden="true"><i></i><i></i><i></i></div>
+         <img src="${it.src}" alt="${it.alt}" loading="lazy" />
+       </figure>`;
 
-    // gallery images (cover excluded si quieres; aquí mostramos todas)
-    let galleryHTML = "";
-    let shown = 0;
-    for (let i = 1; i <= p.gallery; i++) {
-      if (i === p.cover) continue; // la portada ya se muestra arriba
-      shown++;
-      const name = "gallery-" + String(i).padStart(2, "0");
-      const span = shown === 1 ? " span-2" : "";
-      galleryHTML += `
-        <figure class="frame reveal${span}" data-zoom="${IMG(slug, name)}" data-alt="${title} ${i}">
-          <div class="frame__bar" aria-hidden="true"><i></i><i></i><i></i></div>
-          <img src="${IMG(slug, name)}" alt="${title} — UI ${i}" loading="lazy" />
-        </figure>`;
+    caseGroups = {};
+
+    // --- entendimiento (imagen 00), con orden configurable (uOrder) ---
+    const uOrder = p.uOrder || Array.from({ length: p.understanding }, (_, k) => k + 1);
+    const uItems = uOrder.map((n) => ({ src: IMG(slug, "understanding-" + pad(n)), alt: title + " — " + processL }));
+    caseGroups.understanding = uItems;
+    const understandHTML = uItems.map((it, i) =>
+      `<figure class="understand-media reveal" data-lb="understanding" data-i="${i}">
+         <img src="${it.src}" alt="${it.alt} ${i + 1}" loading="lazy" />
+       </figure>`).join("");
+
+    // --- galería / tabs ---
+    const coverGroup = p.galleryTabs ? "tab0" : "gallery";
+    let galleryBlockHTML = "";
+    if (p.galleryTabs) {
+      const tabsBtns = [], panels = [];
+      p.galleryTabs.forEach((tab, ti) => {
+        let nums = tab.images.slice();
+        if (ti === 0) nums = [p.cover].concat(nums.filter((x) => x !== p.cover)); // portada primera en el carrusel
+        const gItems = nums.map(gItem);
+        caseGroups["tab" + ti] = gItems;
+        const figs = tab.images.filter((n) => n !== p.cover)
+          .map((n) => frameFig("tab" + ti, gItems.findIndex((x) => x.n === n), gItem(n))).join("");
+        const count = tab.images.filter((n) => n !== p.cover).length;
+        tabsBtns.push(`<button class="case-tab${ti === 0 ? " is-active" : ""}" role="tab" data-tab="${ti}">${t(tab.label, lang)}<span class="n">${count}</span></button>`);
+        panels.push(`<div class="case-tabpanel${ti === 0 ? " is-active" : ""}" data-panel="${ti}"><div class="gallery">${figs}</div></div>`);
+      });
+      galleryBlockHTML = `<div class="case-tabs" role="tablist">${tabsBtns.join("")}</div>${panels.join("")}`;
+    } else {
+      const gAll = Array.from({ length: p.gallery }, (_, k) => gItem(k + 1));
+      caseGroups.gallery = gAll;
+      const figs = gAll.filter((it) => it.n !== p.cover).map((it) => frameFig("gallery", gAll.indexOf(it), it)).join("");
+      galleryBlockHTML = `<div class="gallery">${figs}</div>`;
     }
+    const coverIdx = (caseGroups[coverGroup] || []).findIndex((x) => x.n === p.cover);
 
     // impact rows
     const impactRows = p.impact.map((r) => `
@@ -286,16 +367,15 @@
         <p class="case-phrase">${t(p.phrase, lang)}</p>
         <div class="case-facts">
           <div><div class="case-fact__l">${clientL}</div><div class="case-fact__v">${p.client}</div></div>
-          <div><div class="case-fact__l">${yearL}</div><div class="case-fact__v">${p.year}</div></div>
           <div><div class="case-fact__l">${roleL}</div><div class="case-fact__v">${t(p.role, lang)}</div></div>
           <div><div class="case-fact__l">${scopeL}</div><div class="case-fact__v">${t(p.scope, lang)}</div></div>
         </div>
       </section>
 
       <section class="container" style="padding-top:2rem">
-        <div class="frame case-cover reveal" data-zoom="${IMG(slug, "gallery-" + String(p.cover).padStart(2, "0"))}" data-alt="${title}">
+        <div class="frame case-cover reveal" data-lb="${coverGroup}" data-i="${coverIdx < 0 ? 0 : coverIdx}" style="cursor:zoom-in">
           <div class="frame__bar" aria-hidden="true"><i></i><i></i><i></i></div>
-          <img src="${IMG(slug, "gallery-" + String(p.cover).padStart(2, "0"))}" alt="${title} — ${t(p.type, lang)}" />
+          <img src="${IMG(slug, "gallery-" + pad(p.cover))}" alt="${title} — ${t(p.type, lang)}" />
         </div>
       </section>
 
@@ -324,7 +404,7 @@
           <div class="body reveal" data-delay="1"><p>${t(p.solution.body, lang)}</p></div>
         </div>
         <p class="eyebrow reveal">${galleryL}</p>
-        <div class="gallery" style="margin-top:1.4rem">${galleryHTML}</div>
+        <div style="margin-top:1.4rem">${galleryBlockHTML}</div>
       </section>
 
       <section class="section-alt">
@@ -354,6 +434,16 @@
         </div>
       </a>
     `;
+    // interacción de tabs de galería
+    root.querySelectorAll(".case-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const ti = btn.getAttribute("data-tab");
+        root.querySelectorAll(".case-tab").forEach((b) => b.classList.toggle("is-active", b === btn));
+        root.querySelectorAll(".case-tabpanel").forEach((pnl) => pnl.classList.toggle("is-active", pnl.getAttribute("data-panel") === ti));
+        root.querySelectorAll('.case-tabpanel[data-panel="' + ti + '"] .reveal').forEach((el) => el.classList.add("in-view"));
+      });
+    });
+
     observeReveals(root);
     initProgress();
   }
@@ -374,6 +464,6 @@
     initScrollSpy();
     initCursor();
     initTilt();
-    initLightbox();
+    initCaseLightbox();
   });
 })();
