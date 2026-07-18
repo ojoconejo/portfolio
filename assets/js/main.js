@@ -449,6 +449,19 @@
     renderCase(lang);
   };
 
+  /* ---------- Analytics: eventos ---------- */
+  function track(name, params) {
+    if (typeof window.gtag === "function") window.gtag("event", name, params || {});
+  }
+  function initAnalytics() {
+    document.addEventListener("click", function (e) {
+      const cv = e.target.closest("a.btn-cv");
+      if (cv) { track("cv_download", { file_name: "Diego-Jaramillo-CV.pdf", location: "footer" }); return; }
+      const mail = e.target.closest('a.contact__ln[href^="mailto:"]');
+      if (mail) { track("email_click", { link_url: mail.getAttribute("href") }); }
+    });
+  }
+
   /* ---------- Init ---------- */
   document.addEventListener("DOMContentLoaded", () => {
     if (location.search.indexOf("qa") !== -1) document.documentElement.classList.add("qa");
@@ -461,5 +474,6 @@
     initTilt();
     initCaseLightbox();
     initWordCycle();
+    initAnalytics();
   });
 })();
